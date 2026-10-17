@@ -1,16 +1,17 @@
 import { PRICE_RANGE, TOWER, UNITS } from "@/lib/units";
 import { formatRMShort } from "@/lib/format";
+import { PALETTE } from "@/lib/palette";
 
 function HeroArt() {
   // Original illustration: a tower, a neighbour and the sun's arc over them.
   return (
     <svg className="hero-art" viewBox="0 0 480 420" role="img" aria-label="Illustration of a condo tower with the sun's path arcing over it">
-      <path d="M40 330 Q240 -40 440 330" fill="none" stroke="#B4561F" strokeWidth="2.5" strokeDasharray="3 9" strokeLinecap="round" />
-      <circle cx="372" cy="150" r="30" fill="#F2B13C" />
-      <circle cx="372" cy="150" r="46" fill="#F2B13C" opacity="0.22" />
-      <rect x="40" y="330" width="400" height="6" rx="3" fill="#1F2A30" opacity="0.85" />
-      <rect x="86" y="230" width="86" height="100" fill="#CFC6B2" />
-      <rect x="196" y="110" width="116" height="220" fill="#1E5A5F" />
+      <path d="M40 330 Q240 -40 440 330" fill="none" stroke={PALETTE.orange} strokeWidth="2.5" strokeDasharray="3 9" strokeLinecap="round" />
+      <circle cx="372" cy="150" r="30" fill={PALETTE.sun} />
+      <circle cx="372" cy="150" r="46" fill={PALETTE.sun} opacity="0.22" />
+      <rect x="40" y="330" width="400" height="6" rx="3" fill={PALETTE.ink} opacity="0.85" />
+      <rect x="86" y="230" width="86" height="100" fill={PALETTE.slab} />
+      <rect x="196" y="110" width="116" height="220" fill={PALETTE.teal} />
       {Array.from({ length: 9 }, (_, r) =>
         [0, 1, 2].map((c) => (
           <rect
@@ -20,12 +21,12 @@ function HeroArt() {
             width="24"
             height="12"
             rx="2"
-            fill={c === 2 && r > 1 && r < 6 ? "#F2B13C" : "#9FD0D6"}
+            fill={c === 2 && r > 1 && r < 6 ? PALETTE.sun : PALETTE.windowLight}
           />
         )),
       )}
-      <polygon points="312,330 312,300 372,330" fill="#1F2A30" opacity="0.14" />
-      <rect x="336" y="260" width="70" height="70" fill="#B9B3A6" />
+      <polygon points="312,330 312,300 372,330" fill={PALETTE.ink} opacity="0.14" />
+      <rect x="336" y="260" width="70" height="70" fill={PALETTE.neighbour} />
     </svg>
   );
 }

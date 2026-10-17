@@ -86,25 +86,16 @@ with sync_playwright() as p:
     page.locator(".compare-table tbody tr").first.get_by_role("button", name="Remove").click()
     rec("remove from compare works", page.locator(".compare-table tbody tr").count() == 3)
 
-    # time slider + date
+    # time slider (the date input was removed; the 3D view uses a fixed day)
     page.locator("#sun-time").fill("480")
     ro = page.locator(".sun-readout").inner_text()
     rec("time slider updates readout", "east" in ro.lower() or "E" in ro, ro[:80])
-    page.locator("#sun-date").fill("2026-06-21")
-    page.wait_for_timeout(200)
-    rec("date change accepted (no error)", page.locator("#sun-date-error").count() == 0)
-    page.locator("#sun-date").fill("")
-    page.wait_for_timeout(200)
-    rec("cleared date shows error and keeps last date", page.locator("#sun-date-error").count() == 1)
-    page.get_by_role("button", name="Mar equinox").click()
-    rec("preset resets date + error", page.locator("#sun-date-error").count() == 0 and page.locator("#sun-date").input_value() == "2026-03-20")
+    rec("date input removed", page.locator("#sun-date").count() == 0)
 
     # play day
-    page.get_by_role("button", name="Play day").click()
-    t1 = page.locator("#sun-time").input_value()
-    page.wait_for_timeout(700)
-    t2 = page.locator("#sun-time").input_value()
-    rec("play advances time", t1 != t2, f"{t1} -> {t2}")
+    page.get_by_role("button", name="Play the year").click()
+    page.wait_for_timeout(1500)
+    rec("play switches to pause while playing", page.get_by_role("button", name="Pause").count() == 1)
     page.get_by_role("button", name="Pause").click()
 
     # canvas click selects a unit

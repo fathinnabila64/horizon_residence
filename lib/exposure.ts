@@ -128,6 +128,52 @@ export function computeAll(date: DateParts): Map<string, Exposure> {
   return map;
 }
 
+export type Period = "year" | "q1" | "q2" | "q3" | "q4";
+
+export const PERIOD_LABEL: Record<Period, string> = {
+  year: "Whole year",
+  q1: "Q1 (Jan–Mar)",
+  q2: "Q2 (Apr–Jun)",
+  q3: "Q3 (Jul–Sep)",
+  q4: "Q4 (Oct–Dec)",
+};
+
+/** Months sampled for each period. One representative day (the 15th) per month. */
+const PERIOD_MONTHS: Record<Period, number[]> = {
+  year: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  q1: [1, 2, 3],
+  q2: [4, 5, 6],
+  q3: [7, 8, 9],
+  q4: [10, 11, 12],
+};
+
+/** The months a period covers, in order. */
+export function periodMonths(period: Period): number[] {
+  return PERIOD_MONTHS[period];
+}
+
+/** Average direct sun per day over a period, in hours. */
+export function computeYearly(unit: Unit, period: Period = "year"): Exposure {
+  const months = PERIOD_MONTHS[period];
+  let morning = 0;
+  let afternoon = 0;
+  for (const month of months) {
+    const e = computeExposure(unit, { year: 2026, month, day: 15 });
+    morning += e.morning;
+    afternoon += e.afternoon;
+  }
+  const m = morning / months.length;
+  const a = afternoon / months.length;
+  return { total: m + a, morning: m, afternoon: a };
+}
+
+/** Period averages for every unit. Does not depend on the date picker. */
+export function computeAllYearly(period: Period = "year"): Map<string, Exposure> {
+  const map = new Map<string, Exposure>();
+  for (const u of UNITS) map.set(u.id, computeYearly(u, period));
+  return map;
+}
+
 /** 0-100 fit score for what the buyer says matters most. */
 export function scoreFor(priority: Priority, e: Exposure): number {
   switch (priority) {

@@ -18,6 +18,7 @@ import {
   type Facing,
   type Unit,
 } from "@/lib/units";
+import { PALETTE } from "@/lib/palette";
 
 export type View = "iso" | Facing;
 
@@ -37,20 +38,6 @@ type Props = {
   selectedId: string | null;
   shortlist: string[];
   onSelect: (id: string) => void;
-};
-
-const COLOR = {
-  ground: "#d9d2bf",
-  tower: "#e8e1d2",
-  slab: "#cfc6b2",
-  neighbour: "#b9b3a6",
-  lit: "#f2b13c",
-  shade: "#4f7f92",
-  muted: "#9aa5ab",
-  outline: "#1f2a30",
-  pin: "#1e5a5f",
-  sunRay: "#d9822b",
-  blocked: "#6b767c",
 };
 
 const PANEL_H = 2.3;
@@ -83,7 +70,7 @@ function UnitPanel({
   const [nx, , nz] = FACING_NORMAL[unit.facing];
   const rotY = unit.facing === "E" || unit.facing === "W" ? Math.PI / 2 : 0;
   const w = PANEL_W[unit.facing];
-  const color = !active ? COLOR.muted : lit ? COLOR.lit : COLOR.shade;
+  const color = !active ? PALETTE.muted : lit ? PALETTE.sun : PALETTE.shade;
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
@@ -95,7 +82,7 @@ function UnitPanel({
       {selected && (
         <mesh position={[0, 0, -0.04]}>
           <boxGeometry args={[w + 1, PANEL_H + 0.9, 0.2]} />
-          <meshBasicMaterial color={COLOR.outline} />
+          <meshBasicMaterial color={PALETTE.ink} />
         </mesh>
       )}
       <mesh
@@ -111,17 +98,23 @@ function UnitPanel({
         <boxGeometry args={[w, PANEL_H, 0.2]} />
         <meshStandardMaterial
           color={color}
-          emissive={active && lit ? COLOR.lit : "#000000"}
+          emissive={active && lit ? PALETTE.sun : "#000000"}
           emissiveIntensity={active && lit ? 0.35 : 0}
           transparent={!active}
           opacity={active ? 1 : 0.45}
           roughness={0.35}
         />
       </mesh>
+      {selected && (
+        <mesh position={[0, PANEL_H / 2 + 4.5, 0.4]} rotation={[Math.PI, 0, 0]}>
+          <coneGeometry args={[2.8, 5.5, 16]} />
+          <meshBasicMaterial color={PALETTE.ink} />
+        </mesh>
+      )}
       {pinned && (
         <mesh position={[0, PANEL_H / 2 + 1.1, 0.2]}>
           <sphereGeometry args={[0.7, 16, 16]} />
-          <meshBasicMaterial color={COLOR.pin} />
+          <meshBasicMaterial color={PALETTE.teal} />
         </mesh>
       )}
     </group>
@@ -157,7 +150,7 @@ function CompassMark({ label, position }: { label: string; position: [number, nu
 
   return (
     <sprite position={position} scale={[14, 14, 1]}>
-      <spriteMaterial map={texture} depthTest={false} transparent />
+      <spriteMaterial map={texture} depthTest transparent />
     </sprite>
   );
 }
@@ -237,18 +230,18 @@ function SceneContent({ view, sun, date, activeIds, selectedId, shortlist, onSel
       {/* ground */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[420, 420]} />
-        <meshStandardMaterial color={COLOR.ground} roughness={1} />
+        <meshStandardMaterial color={PALETTE.ground} roughness={1} />
       </mesh>
 
       {/* main tower */}
       <mesh position={[0, TOWER_HEIGHT / 2, 0]} castShadow receiveShadow {...occlude}>
         <boxGeometry args={[TOWER.width, TOWER_HEIGHT, TOWER.depth]} />
-        <meshStandardMaterial color={COLOR.tower} roughness={0.9} />
+        <meshStandardMaterial color={PALETTE.tower} roughness={0.9} />
       </mesh>
       {slabs.map((y) => (
         <mesh key={y} position={[0, y - 0.15, 0]} castShadow>
           <boxGeometry args={[TOWER.width + 0.8, 0.3, TOWER.depth + 0.8]} />
-          <meshStandardMaterial color={COLOR.slab} roughness={0.9} />
+          <meshStandardMaterial color={PALETTE.slab} roughness={0.9} />
         </mesh>
       ))}
 
@@ -267,7 +260,7 @@ function SceneContent({ view, sun, date, activeIds, selectedId, shortlist, onSel
         return (
           <mesh key={b.id} position={pos} castShadow receiveShadow {...occlude}>
             <boxGeometry args={size} />
-            <meshStandardMaterial color={COLOR.neighbour} roughness={0.95} />
+            <meshStandardMaterial color={PALETTE.neighbour} roughness={0.95} />
           </mesh>
         );
       })}
@@ -296,7 +289,7 @@ function SceneContent({ view, sun, date, activeIds, selectedId, shortlist, onSel
       {daytime && selectedAnchor && (
         <Line
           points={[selectedAnchor, sunPoint]}
-          color={selectedLit ? COLOR.sunRay : COLOR.blocked}
+          color={selectedLit ? PALETTE.sunRay : PALETTE.blocked}
           lineWidth={selectedLit ? 2 : 1.2}
           dashed={!selectedLit}
           dashSize={3}
@@ -307,10 +300,10 @@ function SceneContent({ view, sun, date, activeIds, selectedId, shortlist, onSel
       {/* compass */}
       {(
         [
-          ["N", [0, 0.2, -105]],
-          ["E", [105, 0.2, 0]],
-          ["S", [0, 0.2, 105]],
-          ["W", [-105, 0.2, 0]],
+          ["N", [0, 8, -105]],
+          ["E", [105, 8, 0]],
+          ["S", [0, 8, 105]],
+          ["W", [-105, 8, 0]],
         ] as [string, [number, number, number]][]
       ).map(([label, pos]) => (
         <CompassMark key={label} label={label} position={pos} />

@@ -1,21 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
-import { computeExposure, formatHours } from "@/lib/exposure";
+import { computeYearly, formatHours, PERIOD_LABEL } from "@/lib/exposure";
 import { formatRM } from "@/lib/format";
 import { FACING_LABEL, UNIT_BY_ID } from "@/lib/units";
 import { SHORTLIST_LIMIT, useShortlist } from "./ShortlistContext";
 
 export default function Compare() {
-  const { shortlist, remove, clear, date, notice } = useShortlist();
+  const { shortlist, remove, clear, notice, period } = useShortlist();
 
   const rows = useMemo(
     () =>
       shortlist
         .map((id) => UNIT_BY_ID.get(id))
         .filter((u): u is NonNullable<typeof u> => Boolean(u))
-        .map((unit) => ({ unit, e: computeExposure(unit, date) })),
-    [shortlist, date],
+        .map((unit) => ({ unit, e: computeYearly(unit, period) })),
+    [shortlist, period],
   );
 
   const coolest = rows.length > 1 ? rows.reduce((a, b) => (b.e.afternoon < a.e.afternoon ? b : a)) : null;
@@ -28,7 +28,7 @@ export default function Compare() {
           <p className="eyebrow">Shortlist</p>
           <h2 id="compare-title">Compare your shortlist side by side</h2>
           <p className="lead">
-            Add up to {SHORTLIST_LIMIT} units from the picker. Hours of sun update with the date you chose above.
+            Add up to {SHORTLIST_LIMIT} units from the picker. Hours of sun are averages per day for {PERIOD_LABEL[period].toLowerCase()}.
           </p>
         </header>
 

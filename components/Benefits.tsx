@@ -9,7 +9,7 @@ const ITEMS = [
   },
   {
     title: "Decide with numbers, not hunches",
-    body: "Every unit gets hours of morning and afternoon sun for the date you choose. Shortlist up to four and compare them side by side before you book a viewing.",
+    body: "Every unit gets its average hours of morning and afternoon sun across the year. Shortlist up to four and compare them side by side before you book a viewing.",
   },
 ];
 

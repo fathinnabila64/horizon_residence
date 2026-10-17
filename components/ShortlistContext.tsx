@@ -1,10 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { parseISODate, type DateParts } from "@/lib/sun";
+import type { Period } from "@/lib/exposure";
 
 export const SHORTLIST_LIMIT = 4;
-export const DEFAULT_DATE = "2026-03-20";
 
 type ShortlistState = {
   shortlist: string[];
@@ -12,30 +11,21 @@ type ShortlistState = {
   toggle: (id: string) => void;
   remove: (id: string) => void;
   clear: () => void;
-  /** raw value of the date input */
-  dateInput: string;
-  setDateInput: (value: string) => void;
-  /** last valid date, used for all sun calculations */
-  date: DateParts;
-  dateError: boolean;
+  /** which part of the year the hours of sun are averaged over */
+  period: Period;
+  setPeriod: (p: Period) => void;
 };
 
 const Ctx = createContext<ShortlistState | null>(null);
 
-function isSupportedYear(d: DateParts | null): d is DateParts {
-  return d !== null && d.year >= 2020 && d.year <= 2100;
-}
-
 /**
- * Holds the state shared by the explorer, the comparison table and the enquiry form:
- * the shortlist (kept in memory only - never stored) and the chosen date.
+ * Holds the shortlist, shared by the explorer, the comparison table and the enquiry form.
+ * Kept in memory only - never stored.
  */
 export function ShortlistProvider({ children }: { children: ReactNode }) {
   const [shortlist, setShortlist] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
-  const [dateInput, setDateInputRaw] = useState(DEFAULT_DATE);
-  const [date, setDate] = useState<DateParts>(() => parseISODate(DEFAULT_DATE)!);
-  const [dateError, setDateError] = useState(false);
+  const [period, setPeriod] = useState<Period>("year");
 
   const toggle = useCallback((id: string) => {
     setShortlist((cur) => {
@@ -62,20 +52,9 @@ export function ShortlistProvider({ children }: { children: ReactNode }) {
     setNotice("Shortlist cleared.");
   }, []);
 
-  const setDateInput = useCallback((value: string) => {
-    setDateInputRaw(value);
-    const parsed = parseISODate(value);
-    if (isSupportedYear(parsed)) {
-      setDate(parsed);
-      setDateError(false);
-    } else {
-      setDateError(true);
-    }
-  }, []);
-
   const value = useMemo(
-    () => ({ shortlist, notice, toggle, remove, clear, dateInput, setDateInput, date, dateError }),
-    [shortlist, notice, toggle, remove, clear, dateInput, setDateInput, date, dateError],
+    () => ({ shortlist, notice, toggle, remove, clear, period, setPeriod }),
+    [shortlist, notice, toggle, remove, clear, period],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -17,7 +17,7 @@
   --field-border: #66727a;
   --sun: #f2b13c;
   --accent: #a8481a;
-  --teal: #1e5a5f;
+  --teal: #367588;
   --teal-dark: #154246;
   --teal-wash: #dcebea;
   --danger: #a4261b;
@@ -579,7 +579,7 @@ a:hover {
   background: #9aa5ab;
 }
 .swatch-pin {
-  background: #1e5a5f;
+  background: var(--teal);
   border-radius: 50%;
 }
 .scene-hint {

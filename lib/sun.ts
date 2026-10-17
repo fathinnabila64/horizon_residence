@@ -30,6 +30,9 @@ const deg = (r: number) => (r * 180) / Math.PI;
 
 export type DateParts = { year: number; month: number; day: number };
 
+/** The fixed day used for the 3D sun path and the time slider. The list and comparison use yearly averages. */
+export const DISPLAY_DATE: DateParts = { year: 2026, month: 3, day: 20 };
+
 /** Parse "YYYY-MM-DD". Returns null if the string is not a real calendar date. */
 export function parseISODate(value: string): DateParts | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);

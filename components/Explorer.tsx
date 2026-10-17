@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { computeAll, formatHours, PRIORITY_LABEL, scoreFor, solarNoonHour, sunStatus, type Priority } from "@/lib/exposure";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { computeAllYearly, periodMonths, formatHours, PERIOD_LABEL, type Period, PRIORITY_LABEL, scoreFor, solarNoonHour, sunStatus, type Priority } from "@/lib/exposure";
 import { formatRM } from "@/lib/format";
-import { getSunPosition, sunDirection, sunriseSunset, compassPoint, formatClock } from "@/lib/sun";
+import { DISPLAY_DATE, getSunPosition, sunDirection, sunriseSunset, compassPoint, formatClock } from "@/lib/sun";
 import { FACING_LABEL, UNIT_BY_ID, UNITS } from "@/lib/units";
 import { DEFAULT_FILTERS, FilterPanel, matchesFilters, PriorityPicker, type FilterState } from "./Filters";
 import { useShortlist } from "./ShortlistContext";
@@ -18,6 +18,8 @@ const TowerScene = dynamic(() => import("./TowerScene"), {
   loading: () => <div className="scene-fallback">Loading 3D view…</div>,
 });
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 const INITIAL_VISIBLE = 6;
 const EXPANDED_VISIBLE = 18;
 
@@ -29,9 +31,23 @@ const STATUS_COPY = {
 } as const;
 
 export default function Explorer() {
-  const { date, shortlist, toggle, notice } = useShortlist();
-  const [minutes, setMinutes] = useState(15 * 60 + 30);
+  const { shortlist, toggle, notice, period, setPeriod } = useShortlist();
   const [playing, setPlaying] = useState(false);
+  // While playing, the sun is worked out for each month of the chosen period in turn.
+  // When paused, the page returns to the fixed display day.
+  const playMonths = useMemo(() => periodMonths(period), [period]);
+  const playLabel = period === "year" ? "Play the year" : `Play ${PERIOD_LABEL[period].split(" ")[0]}`;
+  const [monthStep, setMonthStep] = useState(0);
+  useEffect(() => {
+    if (!playing) return;
+    const id = window.setInterval(() => setMonthStep((s) => (s + 1) % playMonths.length), 1500);
+    return () => window.clearInterval(id);
+  }, [playing, playMonths]);
+  const date = useMemo(
+    () => (playing ? { year: 2026, month: playMonths[monthStep % playMonths.length], day: 15 } : DISPLAY_DATE),
+    [playing, playMonths, monthStep],
+  );
+  const [minutes, setMinutes] = useState(15 * 60 + 30);
   const [priority, setPriority] = useState<Priority>("cool");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -42,7 +58,7 @@ export default function Explorer() {
   const sun = useMemo(() => getSunPosition(date, minutes / 60), [date, minutes]);
   const { sunrise, sunset } = useMemo(() => sunriseSunset(date), [date]);
   const solarNoon = useMemo(() => solarNoonHour(date), [date]);
-  const exposures = useMemo(() => computeAll(date), [date]);
+  const exposures = useMemo(() => computeAllYearly(period), [period]);
 
   const ranked = useMemo(() => {
     return UNITS.filter((u) => matchesFilters(u, filters))
@@ -62,6 +78,9 @@ export default function Explorer() {
 
   const viewUnit = useCallback((id: string) => {
     setSelectedId(id);
+    // Turn the camera to the side the unit faces, so it isn't hidden behind the tower.
+    const u = UNIT_BY_ID.get(id);
+    if (u) setView(u.facing);
     sceneRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "nearest",
@@ -141,7 +160,13 @@ export default function Explorer() {
               sunrise={sunrise}
               sunset={sunset}
               solarNoon={solarNoon}
+              playLabel={playLabel}
             />
+            <p className="muted" aria-live="off">
+              {playing
+                ? `Showing ${date.day} ${MONTHS[date.month - 1]} 2026 · month ${playMonths.indexOf(date.month) + 1} of ${playMonths.length} in ${PERIOD_LABEL[period]}.`
+                : `Showing 20 Mar 2026 (fixed day). Press "${playLabel}" to move through ${PERIOD_LABEL[period]}.`}
+            </p>
 
             <section className="selected-unit" aria-labelledby="selected-title" aria-live="polite">
               <h3 id="selected-title">Selected unit</h3>
@@ -155,12 +180,16 @@ export default function Explorer() {
                     </span>
                   </p>
                   <p>
+                    <strong>
+                      At {formatClock(minutes / 60)} on {date.day} {MONTHS[date.month - 1]}:
+                    </strong>{" "}
                     {STATUS_COPY[selectedStatus.status]}
                     {selectedStatus.blockedBy ? ` (${selectedStatus.blockedBy})` : ""}
                   </p>
-                  <p className="muted">
-                    On this date: {formatHours(selectedExposure.morning)} morning sun,{" "}
-                    {formatHours(selectedExposure.afternoon)} afternoon sun.
+                  <p>
+                    <strong>Average direct sun per day, {PERIOD_LABEL[period].toLowerCase()}:</strong>{" "}
+                    {formatHours(selectedExposure.total)} in total, {formatHours(selectedExposure.morning)} before
+                    solar noon and {formatHours(selectedExposure.afternoon)} after.
                   </p>
                   <div className="unit-actions">
                     <button
@@ -180,6 +209,19 @@ export default function Explorer() {
           </div>
 
           <div className="explorer-side">
+            <div className="preset-row" role="group" aria-label="Period">
+              {(Object.keys(PERIOD_LABEL) as Period[]).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className="btn btn-chip"
+                  aria-pressed={period === p}
+                  onClick={() => setPeriod(p)}
+                >
+                  {PERIOD_LABEL[p]}
+                </button>
+              ))}
+            </div>
             <PriorityPicker value={priority} onChange={setPriority} />
             <FilterPanel filters={filters} onChange={setFilters} onReset={() => setFilters(DEFAULT_FILTERS)} />
 
@@ -188,7 +230,7 @@ export default function Explorer() {
               <p className="muted" aria-live="polite">
                 {ranked.length === 0
                   ? "No units match. Try widening your filters."
-                  : `${ranked.length} of ${UNITS.length} units match. Scores use the date and sun settings.`}
+                  : `${ranked.length} of ${UNITS.length} units match. Scores use averages for ${PERIOD_LABEL[period].toLowerCase()}.`}
               </p>
               {notice && (
                 <p className="notice" role="status">
