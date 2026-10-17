@@ -1,6 +1,6 @@
 # Horizon Residence
 
-A fictional condo marketing site for a 48-hour web designer practical assessment. It helps a buyer choose a unit by sunlight: pick a unit, scrub the sun through the day in 3D, compare up to four units, then request a demo viewing.
+A fictional condo marketing site. It helps a buyer choose a unit by sunlight: pick a unit, scrub the sun through the day in 3D, compare up to four units, then request a demo viewing.
 
 Everything on the site is demo content. No personal data is collected or sent.
 
