@@ -1,6 +1,6 @@
 # Horizon Residence
 
-A fictional condo marketing site. It helps a buyer choose a unit by sunlight: pick a unit, scrub the sun through the day in 3D, compare up to four units, then request a demo viewing.
+A condo marketing site for demo purpose.. It helps a buyer choose a unit by sunlight: pick a unit, scrub the sun through the day in 3D, compare up to four units, then request a demo viewing.
 
 Everything on the site is demo content. No personal data is collected or sent.
 
@@ -62,8 +62,6 @@ Deployment to Vercel, served over HTTPS. Complete these steps once and record th
 2. In Vercel, choose **Add New Project**, import the repository, and keep the defaults (framework: Next.js, build: `npm run build`).
 3. Deploy. Vercel gives a `*.vercel.app` HTTPS address.
 4. Open the address in a private browser window and check the unit picker, the 3D view, the shortlist and the enquiry form.
-
-**Resolved issue and check:** the browser console showed a `PCFSoftShadowMap` warning from three.js, because that shadow type was removed. The shadow type is now set to `PCFShadowMap` explicitly on the Canvas. The check: the warning no longer appears in the production build or the dev server.
 
 ## 5. Tests
 
@@ -147,5 +145,3 @@ Material assistance from **Claude (Anthropic AI model)**, used through the Claud
 ## 11. Declaration
 ßß
 I confirm that I have disclosed material assistance and external contributions, and can explain and modify this submission independently.
-
-Candidate: _[name]_  Date: _[date]_

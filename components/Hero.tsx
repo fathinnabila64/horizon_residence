@@ -37,7 +37,7 @@ export default function Hero() {
     <section className="hero" aria-labelledby="hero-title">
       <div className="container hero-inner">
         <div className="hero-copy">
-          <p className="eyebrow">Horizon Residence · Petaling Jaya · fictional demo project</p>
+          <p className="eyebrow">Horizon Residence · Petaling Jaya · demo project</p>
           <h1 id="hero-title">Choosing a condo? See where the sun goes before you sign.</h1>
           <p className="lead">
             Two homes can share a floor plan and feel nothing alike. Pick a unit, scrub through the day in 3D, and know

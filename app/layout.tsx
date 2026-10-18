@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Horizon Residence | Find the condo unit with the right sunlight",
   description:
-    "Fictional demo project: compare condo units by direction, floor and hours of direct sun, explore a 3D sun projection, and book a demo viewing.",
+    "Demo project: compare condo units by direction, floor and hours of direct sun, explore a 3D sun projection, and book a demo viewing.",
   robots: { index: false, follow: false },
 };
 
