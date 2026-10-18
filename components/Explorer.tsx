@@ -36,7 +36,7 @@ export default function Explorer() {
   // While playing, the sun is worked out for each month of the chosen period in turn.
   // When paused, the page returns to the fixed display day.
   const playMonths = useMemo(() => periodMonths(period), [period]);
-  const playLabel = period === "year" ? "Play the year" : `Play ${PERIOD_LABEL[period].split(" ")[0]}`;
+  const playLabel = period === "year" ? "Play" : `Play ${PERIOD_LABEL[period].split(" ")[0]}`;
   const [monthStep, setMonthStep] = useState(0);
   useEffect(() => {
     if (!playing) return;
@@ -208,19 +208,6 @@ export default function Explorer() {
           </div>
 
           <div className="explorer-side">
-            <div className="preset-row" role="group" aria-label="Period">
-              {(Object.keys(PERIOD_LABEL) as Period[]).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  className="btn btn-chip"
-                  aria-pressed={period === p}
-                  onClick={() => setPeriod(p)}
-                >
-                  {PERIOD_LABEL[p]}
-                </button>
-              ))}
-            </div>
             <PriorityPicker value={priority} onChange={setPriority} />
             <FilterPanel filters={filters} onChange={setFilters} onReset={() => setFilters(DEFAULT_FILTERS)} />
             <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
