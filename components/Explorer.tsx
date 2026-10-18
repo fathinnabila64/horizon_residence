@@ -31,7 +31,7 @@ const STATUS_COPY = {
 } as const;
 
 export default function Explorer() {
-  const { shortlist, toggle, notice, period, setPeriod } = useShortlist();
+  const { shortlist, toggle, notice, period, setPeriod, clear } = useShortlist();
   const [playing, setPlaying] = useState(false);
   // While playing, the sun is worked out for each month of the chosen period in turn.
   // When paused, the page returns to the fixed display day.
@@ -87,11 +87,10 @@ export default function Explorer() {
     });
   }, []);
 
-  const sceneSummary = `3D model of the tower at ${formatClock(minutes / 60)}. ${
-    sun.altitude > 0
+  const sceneSummary = `3D model of the tower at ${formatClock(minutes / 60)}. ${sun.altitude > 0
       ? `Sun is in the ${compassPoint(sun.azimuth)}, ${Math.round(sun.altitude)} degrees high.`
       : "The sun is below the horizon."
-  } ${ranked.length} of ${UNITS.length} units match your filters.`;
+    } ${ranked.length} of ${UNITS.length} units match your filters.`;
 
   return (
     <section id="explorer" className="section explorer" aria-labelledby="explorer-title">
@@ -224,6 +223,9 @@ export default function Explorer() {
             </div>
             <PriorityPicker value={priority} onChange={setPriority} />
             <FilterPanel filters={filters} onChange={setFilters} onReset={() => setFilters(DEFAULT_FILTERS)} />
+            <button type="button" className="btn btn-secondary btn-block" onClick={clear}>
+              Clear shortlist
+            </button>
 
             <div className="results-head">
               <h3>Best matches for “{PRIORITY_LABEL[priority].title.toLowerCase()}”</h3>

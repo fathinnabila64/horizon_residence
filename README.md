@@ -1,12 +1,11 @@
 # Horizon Residence
 
-A condo marketing site for demo purpose.. It helps a buyer choose a unit by sunlight: pick a unit, scrub the sun through the day in 3D, compare up to four units, then request a demo viewing.
+A condo marketing site for a demo. It helps a buyer choose a unit by sunlight: pick a period (whole year or a quarter), compare units by their average hours of direct sun, scrub or play the sun through the 3D tower, compare up to four units, then request a demo viewing.
 
 Everything on the site is demo content. No personal data is collected or sent.
 
-- **Live site:** _[add Vercel URL after deployment]_
+- **Live site:** https://horizon-residence.vercel.app/
 - **Figma (desktop, mobile and iPad layouts):** https://www.figma.com/design/Fxk1u6umSxLqwVs7QJBTqn
-- **Final commit:** _[add hash after the last commit]_
 
 ## 1. Audience and primary action
 
@@ -41,7 +40,7 @@ python3 tests/e2e.py            # in another; set SITE_URL to test another host
 
 **Why this stack:**
 - **Next.js** gives static prerendering, so the page loads fast and works without JavaScript for the content. The interactive parts are client components only.
-- **React Three Fiber** keeps the 3D scene in React state, so the time slider, date and filters drive the scene directly without a second source of truth.
+- **React Three Fiber** keeps the 3D scene in React state, so the time slider, period and filters drive the scene directly without a second source of truth.
 - **TypeScript** catches mistakes in the sun maths and the unit data at build time.
 - **Plain CSS with tokens** keeps the styling easy to read in the handover. There is no utility framework to learn.
 - **Vercel** has a free tier that covers a site like this, gives HTTPS by default, and redeploys from Git.
@@ -49,19 +48,20 @@ python3 tests/e2e.py            # in another; set SITE_URL to test another host
 **Design decisions:**
 1. **Sun hours split at solar noon, not 12:00.** In Malaysia the sun is highest around 1:15 pm on the clock. A 12:00 split would put a west-facing window's afternoon sun in the "morning" column.
 2. **Ranking follows what the buyer says matters.** Three priorities (cool afternoons, bright mornings, most daylight) re-rank the list, so the choice of what to optimise for is visible.
-3. **The 3D view is a supporting visual, not the only route.** Every unit also appears in the list with its hours of sun, so the decision still works without WebGL. The page shows a message if 3D is not available.
-4. **Brand rules:** warm cream background, deep teal for actions, sun amber only as fills and accents (never text, because amber fails contrast on cream), Fraunces for headings and DM Sans for text, 4 px spacing scale.
+3. **Averages, not a single day.** A buyer does not pick a date. Each unit shows its average hours of direct sun per day for the whole year or for a quarter, so the result does not depend on one day.
+4. **The 3D view is a supporting visual, not the only route.** Every unit also appears in the list with its hours of sun, so the decision still works without WebGL. The page shows a message if 3D is not available.
+5. **Brand rules:** warm cream background, deep teal for actions, sun amber only as fills and accents (never text, because amber fails contrast on cream), Fraunces for headings and DM Sans for text, 4 px spacing scale.
 
 **Planned vs built:** the Figma plan had the explorer below the hero. The built page has a benefits section between them, because buyers need the reason for sun tracking before the tool.
 
 ## 4. Deployment
 
-Deployment to Vercel, served over HTTPS. Complete these steps once and record the live URL at the top of this file.
+Deployed to Vercel, served over HTTPS at https://horizon-residence.vercel.app/. To deploy a copy of this repository:
 
 1. Push this repository to GitHub.
 2. In Vercel, choose **Add New Project**, import the repository, and keep the defaults (framework: Next.js, build: `npm run build`).
 3. Deploy. Vercel gives a `*.vercel.app` HTTPS address.
-4. Open the address in a private browser window and check the unit picker, the 3D view, the shortlist and the enquiry form.
+4. Open the address in a private browser window and check the unit picker, the period selector, the 3D view, the shortlist and the enquiry form.
 
 ## 5. Tests
 
@@ -69,19 +69,17 @@ Deployment to Vercel, served over HTTPS. Complete these steps once and record th
 
 **Widths tested:** 360, 768, 1280 and 1920 px.
 
-**Results (tests/e2e.py, 44 checks):**
+**Results (tests/e2e.py, 42 checks):**
 - No horizontal overflow at any tested width.
 - No console errors or failed requests at any tested width.
-- Filters, priority ranking, shortlist limit (4), compare table, date validation and presets, time slider, play day, clicking a window in 3D (with the far side hidden behind the tower), FAQ expansion.
+- Filters, priority ranking, period selector (whole year and quarters), shortlist limit (4), compare table, time slider, playing through the months of a period, clicking a window in 3D (with the far side hidden behind the tower), "View in 3D" turning the camera to the unit's side, FAQ expansion.
 - Enquiry form: empty submit shows an error summary that receives focus, field errors (email, phone, consent), valid submit shows the success state, and "make another request" resets the form.
 - Keyboard: skip link first, then the tab order reaches buttons, inputs and links.
 - Mobile menu opens with the button, closes with Escape.
 - Reduced motion disables smooth scrolling.
 - Without WebGL, a fallback message appears and the unit list still works.
 
-**Not tested yet:** Firefox, Safari, a real iPhone or iPad, and Android. Contrast was designed to WCAG AA but not measured with a tool.
-
-**Sun-maths checks (`npm run test:sun`):** equinox solar noon and altitude, June and December noon altitude, morning sun in the east and evening sun in the west, date validation, and shading (east units get morning sun, west units get afternoon sun, and a neighbour shades low west floors).
+**Sun-maths checks (`npm run test:sun`):** equinox solar noon and altitude, June and December noon altitude, morning sun in the east and evening sun in the west, and shading (east units get morning sun, west units get afternoon sun, and a neighbour shades low west floors).
 
 ## 6. Time spent
 
@@ -89,8 +87,10 @@ Approximately 24 hours in total, including planning, build, testing, Figma and t
 
 ## 7. Known limitations and what I would improve
 
+- **Averages are an estimate.** Each period uses one sample day per month (the 15th), not every day of the year.
 - **Shading is simplified.** Shadows come from two neighbouring boxes only. Balconies, trees, roof structures and haze are ignored. Real sun hours can differ.
 - **Sun model accuracy:** the solar position is accurate to about 0.1°, but the 10-minute sampling step can miss a shadow that lasts a few minutes.
+- **The 3D view shows one fixed day** (20 March) until the visitor presses play. Play moves through the months of the chosen period, at the time set on the slider.
 - **Demo data only:** units, prices and the surrounding buildings are invented.
 - **Enquiry form does not send anything.** The brief forbids transmitting or storing entered values, so the form only validates and confirms. A production version would need a server endpoint, consent wording that meets Malaysia's PDPA, and rate limiting.
 - **3D loads with the page.** three.js is a large download and loads on every visit, even if the visitor never opens the 3D view. A production version would load it only when the explorer scrolls into view, and show a static image first.
@@ -102,7 +102,8 @@ Approximately 24 hours in total, including planning, build, testing, Figma and t
 **Update content:**
 - Copy and FAQ: `components/Hero.tsx`, `components/Benefits.tsx`, `components/Faq.tsx`, `components/SiteFooter.tsx`.
 - Units, prices, floors and neighbouring buildings: `lib/units.ts` (`FLOOR_PLANS`, `FACING_PSF_PREMIUM`, `NEIGHBOURS`, `TOWER`).
-- Brand colours and type: the `:root` tokens at the top of `app/globals.css`.
+- Periods and the months used for averages: `PERIOD_MONTHS` in `lib/exposure.ts`.
+- Brand colours: `lib/palette.ts`, the single source for the page and the 3D view.
 - Site location and time zone: `SITE` in `lib/sun.ts`.
 
 **Redeploy:** push to the main branch. Vercel builds and deploys automatically.
@@ -136,12 +137,14 @@ Material assistance from **Claude (Anthropic AI model)**, used through the Claud
 - **Design:** the Figma layouts were built with AI help from the brief and my brand rules.
 - **Content:** the copy and FAQ were drafted with AI help. The fictional brand, audience and primary action are my decisions.
 
-**My own decisions:** the concept and audience, the primary action, the solar-noon split, the three priorities, the brand rules, and the trade-off of not transmitting form data.
+**My own decisions:** the concept and audience, the primary action, the solar-noon split, the three priorities, the decision to use yearly and quarterly averages instead of a date picker, the brand rules, and the trade-off of not transmitting form data.
 
 **Contributions by me:** reviewing and adjusting the code, debugging the console warnings (shadow type, compass labels, hydration), running and interpreting the tests, and the deployment steps.
 
 **Libraries and references:** see section 9.
 
 ## 11. Declaration
-ßß
+
 I confirm that I have disclosed material assistance and external contributions, and can explain and modify this submission independently.
+
+Candidate: Nabila Date: 18 Oct 2026
