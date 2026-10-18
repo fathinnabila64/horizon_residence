@@ -137,11 +137,9 @@ Material assistance from **Claude (Anthropic AI model)**, used through the Claud
 - **Design:** the Figma layouts were built with AI help from the brief and my brand rules.
 - **Content:** the copy and FAQ were drafted with AI help. The fictional brand, audience and primary action are my decisions.
 
-**My own decisions:** the concept and audience, the primary action, the solar-noon split, the three priorities, the decision to use yearly and quarterly averages instead of a date picker, the brand rules, and the trade-off of not transmitting form data.
+**My own decisions:** the concept and audience, the primary action, the solar-noon split, the three priorities, the decision to use yearly, the brand rules, and the trade-off of not transmitting form data.
 
 **Contributions by me:** reviewing and adjusting the code, debugging the console warnings (shadow type, compass labels, hydration), running and interpreting the tests, and the deployment steps.
-
-**Libraries and references:** see section 9.
 
 ## 11. Declaration
 
