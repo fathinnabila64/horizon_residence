@@ -19,12 +19,14 @@ export type Exposure = {
   afternoon: number;
 };
 
-export type Priority = "cool" | "morning" | "daylight";
+export type Priority = "cool" | "morning" | "daylight" | "balanced" | "shade";
 
 export const PRIORITY_LABEL: Record<Priority, { title: string; hint: string }> = {
   cool: { title: "Cooler afternoons", hint: "Fewer hours of direct sun after solar noon" },
   morning: { title: "Bright mornings", hint: "More direct sun before solar noon" },
   daylight: { title: "Most daylight", hint: "Most hours of direct sun overall" },
+  balanced: { title: "Balanced exposure", hint: "Even distribution of direct sun throughout the day" },
+  shade: { title: "More shade", hint: "Fewer hours of direct sun overall" },
 };
 
 type Sample = { hour: number; dir: [number, number, number]; altitude: number };
@@ -183,6 +185,13 @@ export function scoreFor(priority: Priority, e: Exposure): number {
       return Math.round(100 * (Math.min(e.morning, 6) / 6));
     case "daylight":
       return Math.round(100 * (Math.min(e.total, 11) / 11));
+    case "balanced":
+      if (e.total === 0) return 0;
+      return Math.round(100 * (1 - Math.abs(e.morning - e.afternoon) / 12));
+    case "shade":
+      return Math.round(100 * (1 - Math.min(e.total, 11) / 11));
+    default:
+      throw new Error(`Unknown priority: ${priority}`);
   }
 }
 
